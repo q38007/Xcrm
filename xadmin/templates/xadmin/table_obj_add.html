@@ -1,0 +1,17 @@
+{% extends 'xadmin/index.html' %}
+{% load xadmin_tags %}
+
+{% block right-content %}
+    <ol class="breadcrumb">
+      <li><a href="/xadmin">Home</a></li>
+      <li><a href="/xadmin/{{ app_name }}">{{ app_name }}</a></li>
+      <li><a href="/xadmin/{{ app_name }}/{{ model_name }}">{{ model_name }}</a></li>
+      <li class="active">Add {{ model_name }}</li>
+    </ol>
+
+{#    <h2 class="page-header">{% get_model_name admin_class %}</h2>#}
+    <h4 class="page-header">添加数据</h4>
+
+{% include 'xadmin/table_obj_change_component.html' %}
+
+{% endblock %}

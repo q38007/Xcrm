@@ -1,0 +1,363 @@
+CRM 开发
+
+
+1.需求分析
+    存储所有的客户咨询信息
+    避免重复数据
+    客户的多次跟踪记录
+    客户来源、成单率分析
+    每个销售只能修改自己的客户信息
+    报名流程开发
+    班级管理
+    学员成绩，出勤管理
+    问卷调查
+
+    校区管理
+
+    课程管理
+        课程大纲，周期，价格，代课老师
+
+    讲师的上课记录
+
+    学员就业情况
+
+    知识库
+
+
+    权限管理
+    角色
+        销售
+            销售主管
+
+        讲师
+
+
+        学员
+
+
+        管理员
+
+
+2.思维导图
+
+3.业务场景分析（用户使用场景）
+
+	销售
+	    1. 销售人员A刚从  百度推广  聊了一个客户，录入了CRM系统，咨询了Python全栈开发课程，但是没报名
+	    2. 销售B 从 qq群聊了客户，且报名了Python全栈5期课程，给用户发送了报名连接，待用户填写完毕后，把他添加到了PYTHON FULLSTACK S5的班级里
+	    3. 销售C 打电话给之前的一个客户，睡服他报名Linux 36期，但是没睡服成功，更新了跟踪记录
+	    4. 销售D 聊了一个客户，录入时发现 此客户已存在，不能录入，随后通知相应的客户负责人 跟进
+	    5. 销售B 从客户库里过滤出了 所有  超过一个月未跟踪的客户，进行跟踪
+	    6. 销售主管 查看了部门 本月的销售报表，包括来源分析，成单率分析，班级报名数量分析，销售额环比，同比
+
+	学员
+	    1. 客户A 填写了销售发来的 报名连接，上传了个人的证件信息，提交，过了一小会，发现收到一个邮件，告知他报名python 5期课程成功，并帮他开通了学员账号，
+	    2. 学员A 登录了学员系统，看到了自己的合同，报名的班级，课程大纲
+	    3. 学员A 提交了PY 5期的 第3节课的作业
+	    4. 学员A查看了自己在py 5期的 学习成绩，排名
+	    5.学员A 录入了一条 转介绍信息
+	    6. 学员A 在线 搜素一个问题，发现没有答案，于是提交了一个问题，
+
+	讲师
+	    1. 登录了CRM，查看自己管理的班级列表
+	    2. 进入了python 5期，创建了第3节的上课记录，填入了本节内容，作业需求
+	    3. 为PYTHON 5 的第三节课  进行点名，发现小东北迟到了，标记他为迟到状态
+	    4. 批量下载了所有学员的 py 5期第二节的作业， 给每个人在线 批了成绩 + 批注
+
+
+	管理员
+	     1.创建了，课程linux, python ,
+	     2.创建了校区 北京，上海，
+	     3.创建了班级Python FULLSTACK S5 和Linux 36，
+	     4.创建了账号A,B,C,D
+	     5.创建了销售，讲师，学员三个角色，并把ABCD分配到了销售角色里
+	     6.设置了销售可以操作的权限
+
+
+4.原型图
+
+    Axure
+
+5.开发工具选型
+
+    Python
+    Django
+    mysql
+    jquery
+    bootstrap
+    linux
+    nginx
+    pycharm
+
+6.创建项目
+    设计表结构
+    写代码
+
+
+
+    后续加入的表
+       权限
+       问卷调查
+       知识管理
+       合同
+
+  注意：
+    django url中结尾加上/
+        url(r'^(\w+)/(\w+)/$', views.table_obj_list, name="table_obj_list"),
+
+
+确定url, 前端构建html, 生成字典类型的url参数, 后端解析参数进行相应处理, 将结果返回前端
+
+用户认证：authenticate, login, logout
+        用户未认证访问, @login_required默认会跳转到‘/accounts/login/’, 可以在settings文件中通过LOGIN_URL来设定
+
+动态菜单  用户 -- 角色 -- 菜单
+
+
+
+正向关联
+    fk/o2o
+        obj.field
+    m2m
+        obj.field.all()
+
+反向关联
+   one2one  反向查 obj.<反向的小写表名> ???
+   fk | m2m 反向查 obj.<反向的小写表名_set>.all()
+
+        request.user.userprofile.role.select_related()  == request.user.userprofile.role.all()
+
+
+from django import conf
+        conf.settings 动态获取项目settings配置
+
+
+xadmin自动发现及注册功能
+  enabled_admins = {
+        <app_name>: {<table_name>: <admin_class>[model_class], ...}
+
+        'crm': {'customer': CustomerAdmin},
+        'student': {'test': TestAdmin},
+  }
+
+
+ obj = models.CustomerInfo.objects.first()
+
+ app_name = models.CustomerInfo._meta.app_label    | obj._meta.app_label   获取app name
+ model_name = models.CustomerInfo._meta.model_name | obj._meta.model_name  获取表名
+ all_fields_obj = models.CustomerInfo._meta.fields | obj._meta.fields      获取model获取所有字段对象
+
+
+
+ >>> field_obj = models.CustomerInfo._meta.get_field('status') 取一个字段的对象
+ >>> field_obj.choices != None  判断字段是否是choices类型
+
+ >>> obj = models.CustomerInfo.objects.first()
+ >>> obj.'列名' 获取字段的值
+ >>> obj.get_status_display()   获取choices字段的值的别名
+
+ >>> obj_list = field_obj.related_model.objects.all()   获取相关联的m2m表的所有数据
+ >>> selected_list = obj.status.all()                   获取相关联的m2m表的数据
+ >>> set(obj_list) - set(selected_list)                 获取m2m字段没有关联的所有数据
+
+ >>> field_obj.get_choices() 生成下拉菜单, date类型会报错
+ >>> field_obj.get_internal_type() in ('DateField', 'DateTimeField')  处理date类型
+ 'DateField'
+ >>> field_obj.get_internal_type()  判断字段类型
+
+
+html中
+    {% url logout %}   logout为url别名
+        url(r'^logout/', views.acc_logout, name="logout")
+
+    {% build_table_row obj admin_class %}
+        build_table_row为模板自定义函数  @register.simple_tag
+
+    在模板中变量和属性不能以下划线开头, 放到自定义函数
+        err: {{ admin_class.model._meta.model_name }}
+        suc: {% get_model_name admin_class %}
+
+
+处理顺序： 数据集  -->  过滤  -->  搜索 -->  排序  -->  分页
+    在过滤的form当中加入排序条件
+    将过滤条件加入排序的url当中
+    将过滤和排序条件加入分页的url当中
+
+    在以上条件的基础上进行搜索
+        将过滤加入搜索的form
+
+
+为什么分页：
+    减少一次性从db中读取过多的数据
+
+        selec * from tablename limit 4 取前4行
+        selec * from tablename limit 5,10  从第6行开始取10行（6-15）
+
+    https://docs.djangoproject.com/en/1.11/topics/pagination/
+
+
+前端数据修改2种方式：
+    form表单
+        普通form：页面会刷新, 将数据提交到后台
+        django form：
+    ajax：不会刷新页面, 可以请求数据
+
+    前端验证减少服务器压力, 后端验证保证数据合法性
+
+
+动态生成model form
+    >>> def sing(self):
+    ...     print('sing')
+    使用type生成类 ( 类名, 当前类的基类(元祖), 类的成员{字典} )
+    >>> f=type('Foo', (object,), {'func':sing})
+    >>> obj=f()
+    >>> obj.func()
+    sing
+
+    自定义样式：重写__new__
+
+    数据 修改 -- 添加  -- 删除
+
+
+    modelform_obj
+        form_obj.instance   拿到对应的model obj
+
+        for field in form_obj
+            field.name  列名
+            field.label 列的别名
+
+        getattr(form_obj.instance, field)   返回model obj 具体字段的值
+        如果是choice字段, 获取别名
+            getattr(form_obj.instance, 'get_%s_display' % field)()
+
+
+
+delete(递归查找反向关联的所有fk/o2o, 不需要深入查找m2m)
+
+    >>> obj=models.ClassList.objects.last()
+
+    1.找到正向关联的fk/o2o
+    for field_obj in obj._meta.fields:
+         if field_obj.get_internal_type() == 'ForeignKey | OneToOneField':
+                 related_table_name = field_obj.name
+                 getattr(model_obj, related_table_name)
+
+    2.找到正向关联的m2m
+    >>> obj._meta.many_to_many
+
+    3.找到反向关联的fk/m2m/o2o
+    for reversed_fk_obj in obj._meta.related_objects:
+        related_table_name = reversed_fk_obj.name
+        related_lookup_key = "%s_set" % related_table_name  # fk, m2m
+        related_objs = getattr(model_obj, related_lookup_key).all()
+
+
+
+action 自定义函数
+    修改状态, 批量删除
+
+
+csrf 跨域请求保护
+    csrf token 令牌 口令
+
+
+面包屑导航
+    将各级链接写死
+
+
+报名流程
+    销售  发起报名流程, 选择班级,发报名连接给学员
+           选择班级
+           选择 客户
+           生成报名连接
+
+
+    学员  填写在线报名表, 提交个人信息,上传证件信息,同意
+            验证数据合法性（只读字段是否被篡改）
+            文件上传/保存 dropzone(ajax方式)
+
+    销售  审核报名表, 审核通过后,创建一条缴费记录,自动把学员添加到相应的班级, 报名成功
+
+
+
+    合同模板 <pre>标签
+    缴费
+    报名表
+
+
+讲师上课
+
+
+
+自定义用户认证
+
+    class Meta:
+        abstract = True 不创建表,之把字段传递给继承自己的子类
+
+
+    md5是不可以反解
+
+    md5+盐
+
+    SSO(Single Sign On) 单点登录 LDAP
+
+
+    request.user = userprofile
+
+
+
+权限管理
+
+    student [
+        my_course
+        my_contract
+        my_homework
+    ]
+    sales [
+        customers
+            get 获取客户表
+            post 修改 客户信息
+        my_customers
+        ....
+    ]
+
+
+
+一条权限 = 一个动作 = 一个url + 请求方法 + 请求参数
+
+
+perm_dic={
+
+    'crm_table_index':['table_index','GET',[],{},],  #可以查看CRM APP里所有数据库表
+    'crm_table_list':['table_list','GET',[],{}],    #可以查看每张表里所有的数据
+    'crm_table_list_view':['table_change','GET',[],{}],#可以访问表里每条数据的修改页
+    'crm_table_list_change':['table_change','POST',[],{}], #可以对表里的每条数据进行修改
+
+    }
+
+
+    'crm_table_list':['table_list', 'GET', ['source'], {'status'：0}, permission_hook.view_my_own_customers]
+
+    crm_table_list: 自定义权限条目名称, 用来关联用户
+    table_list： url别名
+    GET： 请求方法
+    ['source']： 参数必须包含source字段, 不关心它的值
+    {'status'：0}： 指定的参数和值
+    permission_hook.view_my_own_customers： 钩子
+
+
+    def perm_check(*args,**kwargs):
+
+        1. 获取当前请求的url
+        2. 把url 解析成url_name , resolve(request.path).url_name
+        3. 判断用户是否已登录 ,    user.is_authenticated()
+        3. 拿url_name 到permission_dict 去匹配,匹配时要包括请求方法和参数
+        4. 拿匹配到的权限key, 调用user.has_perm(key)
+
+
+
+
+crm亮点：
+    1.权限管理
+    2.角色管理(不同角色做不同的事)
+    3.一套django通用的增删改查框架
